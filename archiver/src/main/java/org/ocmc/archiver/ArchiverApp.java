@@ -61,6 +61,7 @@ public class ArchiverApp {
     		String dirApp = System.getenv("DIR_APP");
     		String dirAudio = System.getenv("DIR_AUDIO");
     		String dirMedia = System.getenv("DIR_MEDIA");
+    		String instructionsFile = System.getenv("PATH_TO_INSTRUCTIONS_FILE") + "/instructions.html";
        		String copyAll =      System.getenv("COPY_ALL");
        		String copyLastMonth =      System.getenv("COPY_LAST_MONTH");
        		String deleteFilesFrom =      System.getenv("DELETE_FILES_FROM");
@@ -231,6 +232,7 @@ public class ArchiverApp {
        						    		, dirApp
        						    		, dirAudio
        						    		, dirMedia
+       						    		, instructionsFile
 	   									, copyAll
 	   									, copyLastMonth
 	   									, deleteFilesFrom
@@ -254,6 +256,7 @@ public class ArchiverApp {
 	       						    		, dirApp
 	       						    		, dirAudio
 	       						    		, dirMedia
+	       						    		, instructionsFile
 	       						    		, zipAll
 	       						    		, zipAudio
 	       						    		, zipClient

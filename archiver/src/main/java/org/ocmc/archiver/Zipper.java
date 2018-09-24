@@ -30,7 +30,7 @@ public class Zipper implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(Zipper.class);
 	ArchiveIndex indexUtils = new ArchiveIndex();
 
-	private static final String redirectHtml = "<html><head><title>AGES DCS Archive Redirect</title><meta http-equiv='refresh' content='0; URL=./public/dcs/dcs.html'><meta name='keywords' content='automatic redirection'></head><body>Redirecting to the archive index.</body></html>";
+	private static final String redirectHtml = "<html><head><title>AGES DCS Archive Redirect</title><meta http-equiv='refresh' content='0; URL=public/dcs/dcs.html'><meta name='keywords' content='automatic redirection'></head><body>Redirecting to the archive index.</body></html>";
 	private static final String indexHtml = "<html><head><title>AGES DCS Archives</title></head><body></body></html>";
 	String pathRoot = "";
 	File fileRoot;
@@ -53,7 +53,9 @@ public class Zipper implements Runnable {
 	File archiveFile = null;
 	File toFileArchiveSite = null;
 	File redirectFile = null;
-	String redirectFileName = "/index.html";
+	String redirectFileName = "index.html";
+	String pathInstructionsFile = "";
+	File srcFileInstructions = null;
 	boolean debugEnabled = false;
 	boolean zipAll = false;
 	boolean zipAudio = false;
@@ -76,6 +78,7 @@ public class Zipper implements Runnable {
 			, String dirApp
 			, String dirAudio
 			, String dirMedia
+			, String pathInstructionsFile
 			, boolean zipAll
 			, boolean zipAudio
 			, boolean zipClient
@@ -90,6 +93,7 @@ public class Zipper implements Runnable {
 		this.dirClient = this.slash(dirClient);
 		this.dirMedia = this.slash(dirMedia);
 		this.dirSite = this.slash(dirSite);
+		this.pathInstructionsFile = pathInstructionsFile;
 		this.zipAll = zipAll;
 		this.zipAudio = zipAudio;
 		this.zipClient = zipClient;
@@ -104,6 +108,17 @@ public class Zipper implements Runnable {
 		this.toFileArchive = new File(this.srcFileSite.getAbsolutePath() + "/" + this.dirArchive); // ~/html/dcs/archive
 		this.fileRootLength = this.srcFileSite.getAbsolutePath().length();
 		this.archiveIndexFile = new File(this.srcFileSite + "/" + this.dirArchive + "/index.html");
+		this.srcFileInstructions = new File(this.pathInstructionsFile);
+		if (this.srcFileInstructions.exists()) {
+			indexUtils = new ArchiveIndex(org.ocmc.ioc.liturgical.utils.FileUtils.getFileContents(srcFileInstructions));
+		} else {
+			try {
+				org.ocmc.ioc.liturgical.utils.FileUtils.writeFile(this.pathInstructionsFile, ArchiveIndex.getInstructionsFile());
+				indexUtils = new ArchiveIndex();
+			} catch (Exception e) {
+				ErrorUtils.report(logger, e);
+			}
+		}
 		this.reportFiles();
 	}
 	
@@ -139,7 +154,6 @@ public class Zipper implements Runnable {
 			ErrorUtils.report(logger, e);
 		}
 	}
-
 
 	private void reportFiles() {
 		if (this.debugEnabled) {
@@ -180,7 +194,7 @@ public class Zipper implements Runnable {
 				}
 				if (this.zipClient || this.zipAll) {
 					this.fileListClient = this.generateFileList(this.srcFileClient, this.fileListClient);
-					this.redirectFile = new File(this.toFileArchive.getAbsolutePath() + "/temp" + this.redirectFileName);
+					this.redirectFile = new File(this.toFileArchive.getAbsolutePath() + "/temp/" + this.redirectFileName);
 					org.ocmc.ioc.liturgical.utils.FileUtils.writeFile(redirectFile.getAbsolutePath(), redirectHtml);
 					this.fileListClient.add(this.redirectFileName);
 				}
@@ -197,47 +211,8 @@ public class Zipper implements Runnable {
 				
 				File zip = null;
 				
-				if (this.zipAll) {
-					zip = new File(this.toFileArchive.getAbsolutePath()  + "/ages-dcs-all.zip");
-					if (zip.exists()) {
-						try {
-							zip.delete();
-						} catch (Exception e) {
-							ErrorUtils.report(logger, e);
-						}
-					}
-					this.zipIt(zip.getAbsolutePath(), this.fileList);
-					String size = org.apache.commons.io.FileUtils.byteCountToDisplaySize(org.apache.commons.io.FileUtils.sizeOf(zip));
-					this.zipHtmlTableRows.add(
-							this.indexUtils.getZipRowHtml(
-									ArchiveIndex.ZIP_TYPES.ALL
-									, zip.getName()
-									, size
-									)
-							);
-				}
-				
-				if (this.zipAudio) {
-					zip = new File(this.toFileArchive.getAbsolutePath()  + "/ages-dcs-audio.zip");
-					if (zip.exists()) {
-						try {
-							zip.delete();
-						} catch (Exception e) {
-							ErrorUtils.report(logger, e);
-						}
-					}
-					this.zipIt(zip.getAbsolutePath(), this.fileListAudio);
-					String size = org.apache.commons.io.FileUtils.byteCountToDisplaySize(org.apache.commons.io.FileUtils.sizeOf(zip));
-					this.zipHtmlTableRows.add(
-							this.indexUtils.getZipRowHtml(
-									ArchiveIndex.ZIP_TYPES.AUDIO
-									, zip.getName()
-									, size
-									)
-							);
-				}
 				if (this.zipClient) {
-					zip = new File(this.toFileArchive.getAbsolutePath()  + "/ages-dcs-text-pdf.zip");
+					zip = new File(this.toFileArchive.getAbsolutePath()  + "/" + Constants.zipDcs);
 					if (zip.exists()) {
 						try {
 							zip.delete();
@@ -256,7 +231,7 @@ public class Zipper implements Runnable {
 							);
 				}
 				if (this.zipMedia) {
-					zip = new File(this.toFileArchive.getAbsolutePath()  + "/ages-dcs-media.zip");
+					zip = new File(this.toFileArchive.getAbsolutePath()  + "/" + Constants.zipMedia);
 					if (zip.exists()) {
 						try {
 							zip.delete();
@@ -269,6 +244,44 @@ public class Zipper implements Runnable {
 					this.zipHtmlTableRows.add(
 							this.indexUtils.getZipRowHtml(
 									ArchiveIndex.ZIP_TYPES.MEDIA
+									, zip.getName()
+									, size
+									)
+							);
+				}
+				if (this.zipAudio) {
+					zip = new File(this.toFileArchive.getAbsolutePath()  + "/" + Constants.zipAudio);
+					if (zip.exists()) {
+						try {
+							zip.delete();
+						} catch (Exception e) {
+							ErrorUtils.report(logger, e);
+						}
+					}
+					this.zipIt(zip.getAbsolutePath(), this.fileListAudio);
+					String size = org.apache.commons.io.FileUtils.byteCountToDisplaySize(org.apache.commons.io.FileUtils.sizeOf(zip));
+					this.zipHtmlTableRows.add(
+							this.indexUtils.getZipRowHtml(
+									ArchiveIndex.ZIP_TYPES.AUDIO
+									, zip.getName()
+									, size
+									)
+							);
+				}
+				if (this.zipAll) {
+					zip = new File(this.toFileArchive.getAbsolutePath()  + "/" + Constants.zipAll);
+					if (zip.exists()) {
+						try {
+							zip.delete();
+						} catch (Exception e) {
+							ErrorUtils.report(logger, e);
+						}
+					}
+					this.zipIt(zip.getAbsolutePath(), this.fileList);
+					String size = org.apache.commons.io.FileUtils.byteCountToDisplaySize(org.apache.commons.io.FileUtils.sizeOf(zip));
+					this.zipHtmlTableRows.add(
+							this.indexUtils.getZipRowHtml(
+									ArchiveIndex.ZIP_TYPES.ALL
 									, zip.getName()
 									, size
 									)
@@ -350,7 +363,7 @@ public class Zipper implements Runnable {
 	    		ZipEntry ze= new ZipEntry(file);
 	        	zos.putNextEntry(ze);
 	               
-	        	FileInputStream in = new FileInputStream(sourceDir + file);
+	        	FileInputStream in = new FileInputStream(sourceDir + "/" + file);
 	       	   
 	        	int len;
 	        	while ((len = in.read(buffer)) > 0) {
@@ -400,7 +413,7 @@ public class Zipper implements Runnable {
 	     * @return Formatted file path
 	     */
 	    private String generateZipEntry(String file){
-	    	String result = file.substring(this.fileRootLength, file.length());
+	    	String result = file.substring(this.fileRootLength+1, file.length());
 	    	return result;
 	    }
 

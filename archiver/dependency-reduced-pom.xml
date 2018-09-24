@@ -4,7 +4,7 @@
   <groupId>org.ocmc</groupId>
   <artifactId>archiver</artifactId>
   <name>archiver</name>
-  <version>2018.09.23.1</version>
+  <version>2018.09.24.6</version>
   <url>http://maven.apache.org</url>
   <scm>
     <connection>scm:git:https://github.com/OCMC-Translation-Projects/ioc-liturgical-schemas.git</connection>

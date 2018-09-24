@@ -10,6 +10,14 @@ public class ArchiveIndex {
 	static String zipRowPost = "'>";
 	
 	public ArchiveIndex() {
+		this.setContent(getInstructionsFile());
+	}
+
+	public ArchiveIndex(String instructions) {
+		this.setContent(instructions);
+	}
+	
+	private void setContent(String instructions) {
 		sb.append("<!DOCTYPE html>");
 		sb.append("\n<html>");
 		sb.append("\n<head>");
@@ -69,46 +77,8 @@ public class ArchiveIndex {
 		sb.append("	<tr class='index-day-tr'><td class='index-day-td'><span class='index-day'>Creating Zip files.  Please check back in a few minutes.</span></td></tr>");
 		sb.append("\n</table>");
 		sb.append("\n<p class='source'><span id='zipSpan'</span></p><br/><br/>");
-		// instructions table
-		sb.append("\n<p class='index-service-day'>Instructions for Using the Zip Files</p>");
-		sb.append("\n<table id='yearTable' class='services-index-table'>");
-		//      Instructions for the All zip
-		sb.append("	<tr class='zip-how-to-tr'>");
-		sb.append("<td class='zip-how-to-td-left'>");
-		sb.append("<em>DCS - All</em>");
-		sb.append("</td>");
-		sb.append("<td class='zip-how-to-td-right'>");
-		sb.append("Combines the contents of the <em>Audio</em>, <em>HTML / PDF</em>, and <em>Media</em> zips into a single download. ");
-		sb.append("When you extract the zip, you will see a file called <em>index.html</em> that you can open with a web browser.  This will bring up a list of available services  and books. ");
-		sb.append("</td>");
-		sb.append("</tr>");
-		//      Instructions for the HTML / PDF zip
-		sb.append("	<tr class='zip-how-to-tr'>");
-		sb.append("<td class='zip-how-to-td-left'>");
-		sb.append("<em>DCS - HTML / PDF</em>");
-		sb.append("</td>");
-		sb.append("<td class='zip-how-to-td-right'>");
-		sb.append("Can be used by itself, but does not have audio or media.  After you download and unzip it, there is an index.html file you can open with your browser to view the list of available services and books.");
-		sb.append("</td>");
-		sb.append("</tr>");
-		//      Instructions for the Audio zip
-		sb.append("	<tr class='zip-how-to-tr'>");
-		sb.append("<td class='zip-how-to-td-left'>");
-		sb.append("<em>DCS - Audio</em>");
-		sb.append("</td>");
-		sb.append("<td class='zip-how-to-td-right'>");
-		sb.append("If you did not download the <em>DCS - All</em> zip file, but you have downloaded the <em>DCS - HTML / PDF file</em>, if you want to add audio, download the <em>DCS - Audio</em> file and put the zip inside the directory that was created when you unzipped the <em>DCS - HTML / PDF</em> file.  Then, unzip the audio zip file.");
-		sb.append("</tr>");
-		//      Instructions for the Media zip
-		sb.append("	<tr class='zip-how-to-tr'>");
-		sb.append("<td class='zip-how-to-td-left'>");
-		sb.append("<em>DCS - Media</em>");
-		sb.append("</td>");
-		sb.append("<td class='zip-how-to-td-right'>");
-		sb.append("If you did not download the <em>DCS - All</em> zip file, but you have downloaded the <em>DCS - HTML / PDF file</em>, if you want to add media, download the <em>DCS - Media</em> file and put the zip inside the directory that was created when you unzipped the <em>DCS - HTML / PDF</em> file.   Then, unzip the media zip file.");
-		sb.append("</tr>");
-		sb.append("\n</table>");
-		sb.append("\n<p class='source'><span id='yearSpan'</span></p><br/><br/>");
+		// instructions 
+		sb.append(instructions);
 		sb.append("\n</body>");
 		sb.append("\n</html>");
 	}
@@ -137,13 +107,13 @@ public class ArchiveIndex {
 			result.append("DCS - All");
 			break;
 		case AUDIO:
-			result.append("DCS - Audio");
+			result.append("Audio");
 			break;
 		case CLIENT:
-			result.append("DCS - Text / PDF");
+			result.append("DCS");
 			break;
 		case MEDIA:
-			result.append("DCS - Media");
+			result.append("Media");
 			break;
 		default:
 			result.append("Unknown zip file type");
@@ -199,6 +169,53 @@ public class ArchiveIndex {
 
 	public static void setZipRowPost(String zipRowPost) {
 		ArchiveIndex.zipRowPost = zipRowPost;
+	}
+	
+	public static String getInstructionsFile() {
+		StringBuffer sbi = new StringBuffer();
+		sbi.append("\n<p class='index-service-day'>Instructions for Using the Zip Files</p>");
+		sbi.append("\n<div class='zip-instructions'>");
+		sbi.append("\n\t<div class='zip-dcs'>");
+		sbi.append("\n\t\t<div class='zip-instructions-title'>DCS</div>");
+		sbi.append("\n\t\t<div class='zip-instructions-line-1'>Use this link to get the current DCS only, without scores and audio.</div>");
+		sbi.append("\n\t\t\t<ol class='zip-instructions-list'>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Download the zip and extract it.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>When you extract it, a new directory will be created.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Delete the <em>ages-dcs.zip</em> file.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>In the new directory, open the file called <em>index.html</em> in your web browser.</li>");
+		sbi.append("\n\t\t\t</ol>");
+		sbi.append("\n\t</div>");
+		sbi.append("\n\t<div class='zip-media'>");
+		sbi.append("\n\t\t<div class='zip-instructions-title'>Media</div>");
+		sbi.append("\n\t\t<div class='zip-instructions-line-1'>Use this link to add all scores to your DCS.</div>");
+		sbi.append("\n\t\t\t<ol class='zip-instructions-list'>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Download the Media zip file into the directory that was created when you unzipped the DCS file.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Unzip the <em>ages-media.zip</em> file.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Delete the <em>ages-media.zip</em> file.</li>");
+		sbi.append("\n\t\t\t</ol>");
+		sbi.append("\n\t</div>");
+		sbi.append("\n\t<div class='zip-audio'>");
+		sbi.append("\n\t\t<div class='zip-instructions-title'>Audio</div>");
+		sbi.append("\n\t\t<div class='zip-instructions-line-1'>Use this link to add all audio to your DCS.</div>");
+		sbi.append("\n\t\t\t<ol class='zip-instructions-list'>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Download the Audio zip file into the directory that was created when you unzipped the DCS file.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Unzip the <em>ages-audio.zip</em> file.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Delete the <em>ages-audio.zip</em> file.</li>");
+		sbi.append("\n\t\t\t</ol>");
+		sbi.append("\n\t</div>");
+		sbi.append("\n\t<div class='zip-all'>");
+		sbi.append("\n\t\t<div class='zip-instructions-title'>All</div>");
+		sbi.append("\n\t\t<div class='zip-instructions-line-1'>Use this link to download the DCS, media, and audio as a single zip.</div>");
+		sbi.append("\n\t\t\t<ol class='zip-instructions-list'>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Download the DCS - All zip.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Unzip the <em>ages-dcs-all.zip</em> file.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>When you extract it, a new directory will be created.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>Delete the <em>ages-dcs-all.zip</em> file.</li>");
+		sbi.append("\n\t\t\t\t<li class='zip-instructions-li'>In the new directory, open the file called <em>index.html</em> in your web browser.</li>");
+		sbi.append("\n\t\t\t</ol>");
+		sbi.append("\n\t</div>");
+		sbi.append("\n</div>\n");
+		return sbi.toString();
 	}
 
 

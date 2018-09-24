@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class Archiver implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(Archiver.class);
 	
-	ArchiveIndex indexUtils = new ArchiveIndex();
+	ArchiveIndex indexUtils = null;
 	String pathRoot = "";
 	File fileRoot;
 	int fileRootLength = 0;
@@ -64,6 +64,9 @@ public class Archiver implements Runnable {
 	File archiveFile = null;
 	File archiveRootFile = null;
 	File archiveIndexFile = null;
+	String pathInstructionsFile = "";
+	File srcFileInstructions = null;
+
 	
 	String copyAllPaths = "";
 	String copyLastMonthPaths = "";
@@ -88,6 +91,7 @@ public class Archiver implements Runnable {
 			, String dirApp
 			, String dirAudio
 			, String dirMedia
+			, String pathInstructionsFile
 			, String copyAllPaths
 			, String copyLastMonthPaths
 			, String deleteFilesFrom
@@ -112,6 +116,18 @@ public class Archiver implements Runnable {
 		this.srcFileMedia = new File(this.srcFileSite.getAbsolutePath() + "/" + this.dirMedia); // ~/html/dcs/public/m
 		this.srcFileApp = new File(this.srcFileClient.getAbsolutePath() + "/" + this.dirApp); // ~/html/dcs/public/dcs
 		this.archiveIndexFile = new File(this.srcFileSite + "/" + this.dirArchive + "/index.html");
+		this.pathInstructionsFile = pathInstructionsFile;
+		this.srcFileInstructions = new File(this.pathInstructionsFile);
+		if (this.srcFileInstructions.exists()) {
+			indexUtils = new ArchiveIndex(org.ocmc.ioc.liturgical.utils.FileUtils.getFileContents(srcFileInstructions));
+		} else {
+			try {
+				org.ocmc.ioc.liturgical.utils.FileUtils.writeFile(this.pathInstructionsFile, ArchiveIndex.getInstructionsFile());
+				indexUtils = new ArchiveIndex();
+			} catch (Exception e) {
+				ErrorUtils.report(logger, e);
+			}
+		}
 		this.copyAllPaths = copyAllPaths;
 		this.copyLastMonthPaths = copyLastMonthPaths;
 		this.deleteFilesFrom = deleteFilesFrom;
@@ -221,11 +237,11 @@ public class Archiver implements Runnable {
 		this.year = Integer.toString(year);
 		this.month = String.format("%02d", this.intMonth);
 		
+		this.initializeArchiveIndex();
 
 		if (this.archiveDay == -1 || this.archiveDay == dayOfMonth) {
 			Instant start = Instant.now();
 			this.sendMessage("Archiving files");
-			this.initializeArchiveIndex();
 			String archiveYearPath = this.archiveRootFile.getAbsolutePath() + "/archive" + this.year + "/";
 			this.archiveFile = new File(archiveYearPath);
 			this.toFileClient = new File(archiveYearPath);
