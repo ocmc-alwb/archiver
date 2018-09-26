@@ -4,7 +4,7 @@
 
   <groupId>org.ocmc</groupId>
   <artifactId>archiver</artifactId>
-  <version>2018.09.24.6</version>
+  <version>2018.09.24.7</version>
   <packaging>jar</packaging>
 
   <name>archiver</name>

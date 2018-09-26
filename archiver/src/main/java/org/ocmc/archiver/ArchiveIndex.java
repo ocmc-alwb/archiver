@@ -40,6 +40,7 @@ public class ArchiveIndex {
 		sb.append("\n<!--[if lt IE 9]>");
 		sb.append("\n<script src='https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js'></script>");
 		sb.append("\n<script src='https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js'></script>");
+		sb.append("\n<script src='https://code.jquery.com/jquery-3.3.1.min.js'   integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=' crossorigin='anonymous'></script><script> $(function(){ $('#includedContent').load('../../archive/instructions.html'); }); </script>   ");
 		sb.append("\n<![endif]-->");
 		sb.append("\n</head>");
 		sb.append("\n<body>");
@@ -63,7 +64,7 @@ public class ArchiveIndex {
 		sb.append("\n</ul>");
 		sb.append("\n</div>");
 		sb.append("\n</div>");
-		sb.append("\n<div class='index-content''>");
+		sb.append("\n<div class='index-content'>");
 		sb.append("\n<h1 class='index-title'>AGES Digital Chant Stand<br>Archive Index</h1>");
 		// year table
 		sb.append("\n<p class='index-service-day'>Online Access by Year</p>");
@@ -78,7 +79,8 @@ public class ArchiveIndex {
 		sb.append("\n</table>");
 		sb.append("\n<p class='source'><span id='zipSpan'</span></p><br/><br/>");
 		// instructions 
-		sb.append(instructions);
+		sb.append("<div id='includedContent'></div>");
+//		sb.append(instructions);
 		sb.append("\n</body>");
 		sb.append("\n</html>");
 	}
