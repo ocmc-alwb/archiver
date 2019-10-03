@@ -79,10 +79,10 @@ public class ArchiverApp {
     			period = 4;
     		}
 
-    		String unit = System.getenv("TIME_UNIT");
+    		String unit = System.getenv("TIME_UNIT").toLowerCase();
     		TimeUnit timeUnit = TimeUnit.HOURS;
     		if (unit != null) {
-        		switch (unit.toLowerCase()) {
+        		switch (unit) {
         		case ("seconds"): {
         			timeUnit = TimeUnit.SECONDS;
         			break;
@@ -192,7 +192,7 @@ public class ArchiverApp {
            				) {
           			logger.error("PATH_ROOT, DIR_SITE, DIR_CLIENT, DIR_APP, DIR_AUDIO, and DIR_MEDIA  are required. Stopping the app.");
            		} else {
-         			 logger.info("Archiver version: " + Constants.VERSION);
+        			 logger.info("Archiver version: " + Constants.VERSION);
 	       			logger.info("logger info enabled = " + logger.isInfoEnabled());
 	       			logger.info("logger warn enabled = " + logger.isWarnEnabled());
 	       			logger.info("logger trace enabled = " + logger.isTraceEnabled());
@@ -225,14 +225,14 @@ public class ArchiverApp {
 	       			
 	       			if (archiverEnabled) {
 	   					executorService.scheduleAtFixedRate(
-	   							new Archiver(
-       									pathRoot
-       						    		, dirSite 
-       						    		, dirClient
-       						    		, dirApp
-       						    		, dirAudio
-       						    		, dirMedia
-       						    		, instructionsFile
+	   							new ArchiverService(
+      									pathRoot
+      						    		, dirSite 
+      						    		, dirClient
+      						    		, dirApp
+      						    		, dirAudio
+      						    		, dirMedia
+      						    		, instructionsFile
 	   									, copyAll
 	   									, copyLastMonth
 	   									, deleteFilesFrom
@@ -240,36 +240,17 @@ public class ArchiverApp {
 	   									, messagingEnabled
 	   									, debugEnabled
 	   									, reinitEnabled
+	   									, zipperEnabled
+      						    		, zipAll
+      						    		, zipAudio
+      						    		, zipClient
+      						    		, zipMedia
 	   									)
 	   							, initialDelay
 	   							, period
 	   							, timeUnit
 	   							);
-	       			}
-	       			if (zipperEnabled) {
-	      	    		try {
-	       					executorService.scheduleAtFixedRate(
-	       							new Zipper(
-	       									pathRoot
-	       						    		, dirSite 
-	       						    		, dirClient
-	       						    		, dirApp
-	       						    		, dirAudio
-	       						    		, dirMedia
-	       						    		, instructionsFile
-	       						    		, zipAll
-	       						    		, zipAudio
-	       						    		, zipClient
-	       						    		, zipMedia
-	       									, debugEnabled
-	       									)
-	       							, initialDelay
-	       							, period
-	       							, timeUnit
-	       							);
-	       	    		} catch (Exception e) {
-	       	    			ErrorUtils.report(logger, e);
-	       	    		}
+//	   					executorService.shutdown();
 	       			}
             		}
 	    		} catch (Exception e) {
@@ -300,5 +281,5 @@ public class ArchiverApp {
 			  return "Messaging not enabled";
 		  }
 	  }
-
+	  
 }

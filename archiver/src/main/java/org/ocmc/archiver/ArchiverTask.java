@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
  * @author mac002
  *
  */
-public class Archiver implements Runnable {
-	private static final Logger logger = LoggerFactory.getLogger(Archiver.class);
+public class ArchiverTask  {
+	private static final Logger logger = LoggerFactory.getLogger(ArchiverTask.class);
 	
 	ArchiveIndex indexUtils = null;
 	String pathRoot = "";
@@ -84,7 +84,7 @@ public class Archiver implements Runnable {
 	List<String> deleteFilesList = new ArrayList<String>();
 	
 	
-	public Archiver(
+	public ArchiverTask(
 			String pathRoot
 			, String dirSite
 			, String dirClient
@@ -165,14 +165,14 @@ public class Archiver implements Runnable {
 	private void updateArchiveIndex() {
 		try {
 			Document doc = Jsoup.parse(this.archiveIndexFile, "UTF-8", "http://example.com/");
-			Element yearTable = doc.select("table#yearTable").first();
+			Element yearTbody = doc.select("tbody#yearTable").first();
 			Element yearSpan = doc.select("span#yearSpan").first();
 			yearSpan.text("Year Archive last updated " + Instant.now().toString() + " (GMT)");
-			yearTable.children().remove();
+			yearTbody.children().remove();
 			for (String archivePath : this.getArchiveFolderPaths()) {
 				String year = archivePath.substring(archivePath.length()-4);
 				String archiveDir = "/" + this.dirArchive + year;
-				yearTable.append(this.indexUtils.getYearRowHtml(year));
+				yearTbody.append(this.indexUtils.getYearRowHtml(year));
 			}
 			org.ocmc.ioc.liturgical.utils.FileUtils.writeFile(
 					this.archiveIndexFile.getAbsolutePath()
@@ -224,8 +224,8 @@ public class Archiver implements Runnable {
 		}
 	}
 	
-	@Override
-	public void run() {
+	
+	public void process() {
 		this.archiveRootFile = this.srcFileSite;
 		File logFile = new File(this.archiveRootFile.getAbsolutePath() + "/archive/archiver.log");
 		Date today = new Date(); 
@@ -362,6 +362,7 @@ public class Archiver implements Runnable {
 			logFileLine.append(Instant.now().toString());
 			String elapsedMessage = this.getElapsedMessage(start);
 			logFileLine.append(" " + elapsedMessage);
+			logFileLine.append("\n");
 			this.sendMessage("." + elapsedMessage);
 			try {
 				org.apache.commons.io.FileUtils.write(logFile, logFileLine.toString(), true);
@@ -370,7 +371,7 @@ public class Archiver implements Runnable {
 			}
 		} else {
 			try {
-				org.apache.commons.io.FileUtils.write(logFile, Instant.now().toString() + " today is " + dayOfMonth + " so did not archive.  Day of Month must be " + this.archiveDay, true);
+				org.apache.commons.io.FileUtils.write(logFile, Instant.now().toString() + " today is " + dayOfMonth + " so did not archive.  Day of Month must be " + this.archiveDay + "\n", true);
 			} catch (IOException e) {
 				ErrorUtils.report(logger, e);
 			}

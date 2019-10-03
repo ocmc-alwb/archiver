@@ -26,11 +26,11 @@ import org.slf4j.LoggerFactory;
  * @author mac002
  *
  */
-public class Zipper implements Runnable {
-	private static final Logger logger = LoggerFactory.getLogger(Zipper.class);
+public class ZipperTask  {
+	private static final Logger logger = LoggerFactory.getLogger(ZipperTask.class);
 	ArchiveIndex indexUtils = new ArchiveIndex();
 
-	private static final String redirectHtml = "<html><head><title>AGES DCS Archive Redirect</title><meta http-equiv='refresh' content='0; URL=public/dcs/dcs.html'><meta name='keywords' content='automatic redirection'></head><body>Redirecting to the archive index.</body></html>";
+	private static final String redirectHtml = "<html><head><title>AGES DCS Archive Redirect</title><meta http-equiv='refresh' content='0; URL=public/dcs/'><meta name='keywords' content='automatic redirection'></head><body>Redirecting to the archive index.</body></html>";
 	private static final String indexHtml = "<html><head><title>AGES DCS Archives</title></head><body></body></html>";
 	String pathRoot = "";
 	File fileRoot;
@@ -70,8 +70,9 @@ public class Zipper implements Runnable {
     List<String> fileListMedia = new ArrayList<String>();
     
     List<String> zipHtmlTableRows = new ArrayList<String>();
+    StringBuffer errors = new StringBuffer();
 	
-	public Zipper(
+	public ZipperTask(
 			String pathRoot
 			, String dirSite
 			, String dirClient
@@ -117,14 +118,24 @@ public class Zipper implements Runnable {
 				indexUtils = new ArchiveIndex();
 			} catch (Exception e) {
 				ErrorUtils.report(logger, e);
+				this.errors.append(e.getStackTrace());
 			}
 		}
 		this.reportFiles();
 	}
 	
-	private void initializeArchiveIndex() {
+	private synchronized void initializeArchiveIndex() {
 		try {
-			if (! this.archiveIndexFile.exists()) {
+			if (this.archiveIndexFile.exists()) {
+				Document doc = Jsoup.parse(this.archiveIndexFile, "UTF-8", "http://example.com/");
+				Element zipTbody = doc.select("tbody#zipTable").first();
+				zipTbody.children().remove();
+				zipTbody.append("	<tr class='index-day-tr'><td class='index-day-td'><span class='index-day'>Creating Zip files.  Please check back in a few minutes.</span></td></tr>");
+				org.ocmc.ioc.liturgical.utils.FileUtils.writeFile(
+						this.archiveIndexFile.getAbsolutePath()
+						, doc.toString()
+						);
+			} else {
 				this.archiveIndexFile.getParentFile().mkdirs();
 				org.ocmc.ioc.liturgical.utils.FileUtils.writeFile(
 						this.archiveIndexFile.getAbsolutePath()
@@ -133,18 +144,19 @@ public class Zipper implements Runnable {
 			}
 		} catch (Exception e) {
 			ErrorUtils.report(logger, e);
+			this.errors.append(e.getStackTrace());
 		}
 	}
 	
-	private void updateArchiveIndex() {
+	private  synchronized void updateArchiveIndex() {
 		try {
 			Document doc = Jsoup.parse(this.archiveIndexFile, "UTF-8", "http://example.com/");
-			Element zipTable = doc.select("table#zipTable").first();
+			Element zipTbody = doc.select("tbody#zipTable").first();
 			Element zipSpan = doc.select("span#zipSpan").first();
 			zipSpan.text("Zips last updated " + Instant.now().toString() + " (GMT)");
-			zipTable.children().remove();
+			zipTbody.children().remove();
 			for (String row : this.zipHtmlTableRows) {
-				zipTable.append(row);
+				zipTbody.append(row);
 			}
 			org.ocmc.ioc.liturgical.utils.FileUtils.writeFile(
 					this.archiveIndexFile.getAbsolutePath()
@@ -152,10 +164,11 @@ public class Zipper implements Runnable {
 					);
 		} catch (Exception e) {
 			ErrorUtils.report(logger, e);
+			this.errors.append(e.getStackTrace());
 		}
 	}
 
-	private void reportFiles() {
+	private  synchronized void reportFiles() {
 		if (this.debugEnabled) {
 			logger.info("Root = " + this.fileRoot.getAbsolutePath());
 			logger.info("Site = " + this.srcFileSite.getAbsolutePath());
@@ -164,6 +177,7 @@ public class Zipper implements Runnable {
 			logger.info("Media = " + this.srcFileMedia.getAbsolutePath());
 		}
 	}
+	
 	private String slash(String path) {
 		if (path.endsWith("/")) {
 			return path;
@@ -172,15 +186,16 @@ public class Zipper implements Runnable {
 		}
 	}
 	
-	@Override
-	public void run() {
-		Instant start = Instant.now();
+	public synchronized void process() {
+	 Instant start = Instant.now();
 		File logFile = new File(this.toFileArchive.getAbsolutePath() + "/" + "zipper.log");
+		this.errors = new StringBuffer();
 		if (! this.toFileArchive.exists()) {
 			try {
 				FileUtils.mkdirs(this.toFileArchive);
 			} catch (IOException e) {
 				ErrorUtils.report(logger, e);
+				this.errors.append(e.getStackTrace());
 			}
 		}
 		logger.info("Starting zip");
@@ -218,6 +233,7 @@ public class Zipper implements Runnable {
 							zip.delete();
 						} catch (Exception e) {
 							ErrorUtils.report(logger, e);
+							this.errors.append(e.getStackTrace());
 						}
 					}
 					this.zipIt(zip.getAbsolutePath(), this.fileListClient);
@@ -256,6 +272,7 @@ public class Zipper implements Runnable {
 							zip.delete();
 						} catch (Exception e) {
 							ErrorUtils.report(logger, e);
+							this.errors.append(e.getStackTrace());
 						}
 					}
 					this.zipIt(zip.getAbsolutePath(), this.fileListAudio);
@@ -275,6 +292,7 @@ public class Zipper implements Runnable {
 							zip.delete();
 						} catch (Exception e) {
 							ErrorUtils.report(logger, e);
+							this.errors.append(e.getStackTrace());
 						}
 					}
 					this.zipIt(zip.getAbsolutePath(), this.fileList);
@@ -293,9 +311,11 @@ public class Zipper implements Runnable {
 						this.redirectFile.getParentFile().delete();
 					}
 				} catch (Exception e) {
+					this.errors.append(e.getStackTrace());
 				}
 		} catch (Exception e) {
 			ErrorUtils.report(logger, e);
+			this.errors.append(e.getStackTrace());
 		}
 		if (this.debugEnabled) {
 			logger.info(result.toString());
@@ -308,10 +328,18 @@ public class Zipper implements Runnable {
 		String elapsedMessage = this.getElapsedMessage(start);
 		logFileLine.append(" " + elapsedMessage);
 		logger.info("Finished zipping...");
+		if (this.errors.length() > 0) {
+			logFileLine.append("\nErrors:\n");
+			logFileLine.append(this.errors.toString());
+		} else {
+			logFileLine.append("\nNo errors thrown...");
+		}
+		logFileLine.append("\n");
 		try {
 			org.apache.commons.io.FileUtils.write(logFile, logFileLine.toString(), true);
 		} catch (IOException e) {
 			ErrorUtils.report(logger, e);
+			this.errors.append(e.getStackTrace());
 		}
 	}
 	
@@ -338,7 +366,7 @@ public class Zipper implements Runnable {
 	     * @param zipFile output ZIP file location
 	     * @param fileList list of files to add
 	     */
-	    public void zipIt(String zipFile, List<String> fileList){
+	    public  synchronized void zipIt(String zipFile, List<String> fileList){
 
 	     byte[] buffer = new byte[1024];
 	    	
@@ -382,6 +410,7 @@ public class Zipper implements Runnable {
 	
 	    }catch(IOException ex){
 	       ex.printStackTrace();   
+			this.errors.append(ex.toString());
 	    }
 	   }
 	    
@@ -391,7 +420,7 @@ public class Zipper implements Runnable {
 	     * @param node file or directory
 	     * @param fileList the file list we are generating
 	     */
-	    public List<String> generateFileList(File node, List<String> fileList){
+	    public  synchronized List<String> generateFileList(File node, List<String> fileList){
 
 	    	//add file only
 		if(node.isFile()){
@@ -412,7 +441,7 @@ public class Zipper implements Runnable {
 	     * @param file file path
 	     * @return Formatted file path
 	     */
-	    private String generateZipEntry(String file){
+	    private  synchronized String generateZipEntry(String file){
 	    	String result = file.substring(this.fileRootLength+1, file.length());
 	    	return result;
 	    }

@@ -4,7 +4,7 @@ public class ArchiveIndex {
 	StringBuffer sb = new StringBuffer();
 	static enum ZIP_TYPES {ALL, AUDIO, CLIENT, MEDIA};
 	static String yearRowPre = "<tr class='index-day-tr'><td class='index-day-td'><a class='index-day-link' href='../../archive";
-	static String yearRowPost = "/dcs/dcs.html'>";
+	static String yearRowPost = "/dcs/'>";
 	static String yearRowSuffix = "</a></td></tr>";
 	static String zipRowPre = "<tr class='index-day-tr'><td class='index-day-td'><a class='index-day-link' href='../../archive/";
 	static String zipRowPost = "'>";
@@ -33,15 +33,16 @@ public class ArchiveIndex {
 		sb.append("\n<style>#instructionsTable > tbody {float:left;width: 50%;}td.zip-how-to-td-left {width:20%; padding: 20px;text-align:left;}td.zip-how-to-td-right {width: 80%; padding: 20px; text-align:left;}</style>");
 		sb.append("\n");
 		sb.append("\n<!-- Scripts -->");
+		sb.append("\n<script src='https://code.jquery.com/jquery-3.3.1.min.js'   integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=' crossorigin='anonymous'></script>");
+		sb.append("\n<script> $(function(){ $('#includedContent').load('../../archive/instructions.html'); });</script>");
 		sb.append("\n<script data-main='js/app' src='js/lib/require.js'></script>");
-		sb.append("\n");
-		sb.append("\n<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->");
-		sb.append("\n<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->");
-		sb.append("\n<!--[if lt IE 9]>");
-		sb.append("\n<script src='https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js'></script>");
-		sb.append("\n<script src='https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js'></script>");
-		sb.append("\n<script src='https://code.jquery.com/jquery-3.3.1.min.js'   integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=' crossorigin='anonymous'></script><script> $(function(){ $('#includedContent').load('../../archive/instructions.html'); }); </script>   ");
-		sb.append("\n<![endif]-->");
+		sb.append("\n\n");
+//		sb.append("\n<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->");
+//		sb.append("\n<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->");
+//		sb.append("\n<!--[if lt IE 9]>");
+//		sb.append("\n<script src='https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js'></script>");
+//		sb.append("\n<script src='https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js'></script>");
+//		sb.append("\n<![endif]-->");
 		sb.append("\n</head>");
 		sb.append("\n<body>");
 		sb.append("\n<div class='agesMenu'>");
@@ -68,16 +69,20 @@ public class ArchiveIndex {
 		sb.append("\n<h1 class='index-title'>AGES Digital Chant Stand<br>Archive Index</h1>");
 		// year table
 		sb.append("\n<p class='index-service-day'>Online Access by Year</p>");
-		sb.append("\n<table id='yearTable' class='services-index-table'>");
+		sb.append("\n<table class='services-index-table'>");
+		sb.append("\n<tbody id='yearTable' class='services-index-table'>");
 		sb.append("	<tr class='index-day-tr'><td class='index-day-td'><span class='index-day'>Creating Archive files.  Please check back in a few minutes.</span></td></tr>");
+		sb.append("\n</tbody>");
 		sb.append("\n</table>");
-		sb.append("\n<p class='source'><span id='yearSpan'</span></p><br/><br/>");
+		sb.append("\n<p class='source'><span id='yearSpan'></span></p><br/><br/>");
 		// zip table
 		sb.append("\n<p class='index-service-day'>Zips of the Current Version of DCS</p>");
-		sb.append("\n<table id='zipTable' class='services-index-table'>");
+		sb.append("\n<table class='services-index-table'>");
+		sb.append("\n<tbody id='zipTable' class='services-index-table'>");
 		sb.append("	<tr class='index-day-tr'><td class='index-day-td'><span class='index-day'>Creating Zip files.  Please check back in a few minutes.</span></td></tr>");
+		sb.append("\n</tbody>");
 		sb.append("\n</table>");
-		sb.append("\n<p class='source'><span id='zipSpan'</span></p><br/><br/>");
+		sb.append("\n<p class='source'><span id='zipSpan'></span></p><br/><br/>");
 		// instructions 
 		sb.append("<div id='includedContent'></div>");
 //		sb.append(instructions);
