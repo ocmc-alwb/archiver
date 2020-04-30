@@ -1,3 +1,11 @@
 # Archiver - creates archives of AGES DCS Services and Books
 
 [View the current archive...](http://www.agesinitiatives.com/dcs/archive/)
+
+Except for docker.zip, the files and directories are for use in Eclipse.
+
+The docker.zip contains:
+
+* docker-compose.yaml <== pulls from docker hub the version set in the .env file
+* .env  <== read by the docker-compose
+* instructions <== a directory with an html file that is included in the archive
